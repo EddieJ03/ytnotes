@@ -7,7 +7,17 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 db = SQLAlchemy(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
+ENV = 'prod'
+
+if ENV == 'dev':
+    app.debug=True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/notes'
+else:
+    app.debug=False
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://pghfssinatzcyh:5c9eaee763415a5c427d42716ac90bec76900eed9b9e37c8a76d93e3ee01aef9@ec2-3-222-74-92.compute-1.amazonaws.com:5432/d4v0upfir3mrc2'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 resource_fields = {
     'chrome_identity_id': fields.String,
@@ -17,6 +27,7 @@ resource_fields = {
 }
 
 class NoteModel(db.Model):
+    __tablename__ = 'notes'
     id = db.Column(db.Integer, primary_key=True)
     chrome_identity_id = db.Column(db.String(50), nullable=False)
     video_id = db.Column(db.String(50), nullable=False)
@@ -47,10 +58,13 @@ class Notes(Resource): #inherit from Resource
         if not chromeIdentity or not videoId or not userNote or not timeStamp:
             return "Missing a parameter", 400
 
-        note = NoteModel(chrome_identity_id=chromeIdentity, video_id=videoId, note=userNote, timestamp=float(timeStamp))
-        db.session.add(note)
-        db.session.commit()
-        return note
+        try:
+            note = NoteModel(chrome_identity_id=chromeIdentity, video_id=videoId, note=userNote, timestamp=float(timeStamp))
+            db.session.add(note)
+            db.session.commit()
+            return note
+        except ValueError:
+            return "In valid timestamp", 400
 
     def patch(self):
         args = request.args
@@ -62,7 +76,10 @@ class Notes(Resource): #inherit from Resource
         if not chromeIdentity or not videoId or not userNote or not timeStamp:
             return "Missing a parameter", 400
 
-        result = NoteModel.query.filter_by(chrome_identity_id=chromeIdentity,video_id=videoId,timestamp=float(timeStamp)).first()
+        try:
+            result = NoteModel.query.filter_by(chrome_identity_id=chromeIdentity,video_id=videoId,timestamp=float(timeStamp)).first()
+        except ValueError:
+            return "In valid timestamp", 400
 
         if not result:
             return "Note not found", 400
@@ -81,7 +98,10 @@ class Notes(Resource): #inherit from Resource
         if not chromeIdentity or not videoId or not timeStamp:
             return "Missing a parameter", 400
 
-        result = NoteModel.query.filter_by(chrome_identity_id=chromeIdentity,video_id=videoId,timestamp=float(timeStamp)).first()
+        try:
+            result = NoteModel.query.filter_by(chrome_identity_id=chromeIdentity,video_id=videoId,timestamp=float(timeStamp)).first()
+        except ValueError:
+            return "In valid timestamp", 400
 
         if not result:
            return "Note not found", 400
@@ -94,4 +114,4 @@ class Notes(Resource): #inherit from Resource
 api.add_resource(Notes, "/")
 
 if __name__ == "__main__":
-    app.run(debug=True) #get rid of in prod env
+    app.run() #get rid of in prod env
