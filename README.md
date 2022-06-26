@@ -2,8 +2,13 @@
 
 A Chrome Extension to allow you to take notes during videos. 
 
-Add Note:
-<img width="1280" alt="image" src="https://user-images.githubusercontent.com/57547638/175163981-86f3d5a4-2e83-470d-a59d-2ff16af45d92.png">
+Add a Note While Watching:
+![image](https://user-images.githubusercontent.com/57547638/175798629-a1c81e9a-7c4e-452b-91fe-b31f4e4a250f.png)
 
-It will show up:
-<img width="1280" alt="image" src="https://user-images.githubusercontent.com/57547638/175164155-935ad5b1-e7ac-42be-ae09-2ae555f5767f.png">
+Edit Notes You Have Already Taken:
+![image](https://user-images.githubusercontent.com/57547638/175798646-1b8cc024-df92-4ebd-a1c9-019135cfa825.png)
+
+See All Notes for a Video:
+![image](https://user-images.githubusercontent.com/57547638/175798714-396f5fb6-ab95-462a-ace6-0ae656d429b1.png)
+
+
