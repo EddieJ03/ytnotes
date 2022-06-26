@@ -1,7 +1,7 @@
 {
-  "name": "My YT Bookmarks",
+  "name": "YouNotes",
   "version": "0.1.0",
-  "description": "Saving timestamps in YT videos",
+  "description": "Add notes to a YouTube video",
   "permissions": ["storage", "tabs", "identity", "identity.email"],
   "host_permissions": ["https://*.youtube.com/*"],
   "background": {
@@ -18,8 +18,7 @@
       "resources": [
         "assets/bookmark.png",
         "assets/play.png",
-        "assets/delete.png",
-        "assets/save.png"
+        "assets/delete.png"
       ],
       "matches": ["https://*.youtube.com/*"]
     }
@@ -30,7 +29,7 @@
       "24": "assets/ext-icon.png",
       "32": "assets/ext-icon.png"
     },
-    "default_title": "My YT Bookmarks",
+    "default_title": "YouNotes",
     "default_popup": "popup.html"
   },
   "manifest_version": 3

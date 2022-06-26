@@ -1,4 +1,4 @@
-import { getActiveTabURL } from "./utils.js";
+import { getActiveTabURL, getTime } from "./utils.js";
 
 const addNewBookmark = (bookmarks, bookmark) => {
   const bigDiv = document.createElement("div");
@@ -7,14 +7,14 @@ const addNewBookmark = (bookmarks, bookmark) => {
   const newBookmarkElement = document.createElement("div");
   const noteContents = document.createElement("p");
 
-  bookmarkTitleElement.textContent = bookmark.timestamp;
+  bookmarkTitleElement.textContent = "Note at " + getTime(bookmark.timestamp);
   bookmarkTitleElement.className = "bookmark-title";
   controlsElement.className = "bookmark-controls";
-  console.log("bookmark.contents");
   noteContents.innerHTML = bookmark.note;
 
   setBookmarkAttributes("play", onPlay, controlsElement);
   setBookmarkAttributes("delete", onDelete, controlsElement);
+  setBookmarkAttributes("edit", onEdit, controlsElement);
   
   newBookmarkElement.id = "bookmark-" + bookmark.timestamp;
   newBookmarkElement.className = "bookmark";
@@ -40,9 +40,61 @@ const viewBookmarks = (currentBookmarks=[]) => {
       addNewBookmark(bookmarksElement, bookmark);
     }
   } else {
-    bookmarksElement.innerHTML = '<p>No bookmarks to show</p>';
+    bookmarksElement.innerHTML = '<p>No notes to show</p>';
   }
 };
+
+const onEdit = e => {
+  const greatGrandParent = e.target.parentNode.parentNode.parentNode;
+  const paragraph = greatGrandParent.children[1];
+  greatGrandParent.removeChild(paragraph);
+  const editNoteArea = document.createElement('textarea');
+  editNoteArea.style.height = "100px";
+  editNoteArea.style.width = "auto";
+  editNoteArea.style.margin = "10px";
+  editNoteArea.style.overflowY = "auto";
+  editNoteArea.innerHTML = paragraph.innerHTML;
+  greatGrandParent.appendChild(editNoteArea);
+
+  // remove edit button and add save + cancel
+  const bookmarks = e.target.parentNode;
+  bookmarks.removeChild(e.target);
+  setBookmarkAttributes("save", onSave, bookmarks);
+  setBookmarkAttributes("cancel", (e) => onCancel(e, paragraph), bookmarks);
+}
+
+const onSave = (e) => {
+  const grandParent = e.target.parentNode.parentNode;
+  const greatGrandParent = grandParent.parentNode;
+  const editArea = greatGrandParent.children[1];
+  const newContents = editArea.value;
+  const paragraph = document.createElement("p");
+  paragraph.innerHTML = newContents;
+  greatGrandParent.removeChild(editArea);
+  greatGrandParent.appendChild(paragraph);
+  const bookmarks = e.target.parentNode;
+  const cancel = bookmarks.children[3];
+  const save = bookmarks.children[2];
+  bookmarks.removeChild(cancel);
+  bookmarks.removeChild(save);
+  setBookmarkAttributes("edit", onEdit, bookmarks);
+  editNote(grandParent.getAttribute("chrome-identity"), grandParent.getAttribute("video-id"), grandParent.getAttribute("timestamp"), newContents);
+}
+
+const onCancel = (e, oldContents) => {
+  const greatGrandParent = e.target.parentNode.parentNode.parentNode;
+  const editArea = greatGrandParent.children[1];
+  const paragraph = document.createElement("p");
+  paragraph.innerHTML = oldContents.innerHTML;
+  greatGrandParent.removeChild(editArea);
+  greatGrandParent.appendChild(paragraph);
+  const bookmarks = e.target.parentNode;
+  const cancel = bookmarks.children[3];
+  const save = bookmarks.children[2];
+  bookmarks.removeChild(cancel);
+  bookmarks.removeChild(save);
+  setBookmarkAttributes("edit", onEdit, bookmarks);
+}
 
 const onPlay = async e => {
   const bookmarkTime = e.target.parentNode.parentNode.getAttribute("timestamp");
@@ -62,7 +114,15 @@ const onDelete = async e => {
     "bookmark-" + bookmarkTime
   );
 
-  bookmarkElementToDelete.parentNode.removeChild(bookmarkElementToDelete);
+  const parentElement = bookmarkElementToDelete.parentNode;
+
+  const grandparentElement = parentElement.parentNode;
+
+  grandparentElement.removeChild(parentElement);
+
+  if(grandparentElement.childElementCount === 0) {
+    grandparentElement.innerHTML = `<p>No notes to show</p>`
+  }
 
   await deleteNote(chromeIdentity, videoId, bookmarkTime)
 };
@@ -78,7 +138,7 @@ const setBookmarkAttributes =  (src, eventListener, controlParentElement) => {
 
 const addBookmark = async (obj) => {
   const bookmarksElement = document.getElementById("bookmarks");
-  if(bookmarksElement.innerHTML === '<p>No bookmarks to show</p>') {
+  if(bookmarksElement.innerHTML === '<p>No notes to show</p>') {
     bookmarksElement.innerHTML = "";
   }
   
@@ -87,7 +147,7 @@ const addBookmark = async (obj) => {
 
 const getNotes = async (chromeIdentity, currentVideo) => {
   try {
-    const response = await fetch(`http://127.0.0.1:5000/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}`, {
+    const response = await fetch(`https://tubenotes-server.herokuapp.com/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}`, {
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
@@ -103,7 +163,7 @@ const getNotes = async (chromeIdentity, currentVideo) => {
 
 const saveNote = async (chromeIdentity, currentVideo, note, timestamp) => {
   try {
-    let response = await fetch(`http://127.0.0.1:5000/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}&note=${note}&timestamp=${timestamp}`, {
+    let response = await fetch(`https://tubenotes-server.herokuapp.com/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}&note=${note}&timestamp=${timestamp}`, {
       method: 'PUT', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
@@ -119,7 +179,7 @@ const saveNote = async (chromeIdentity, currentVideo, note, timestamp) => {
 
 const deleteNote = async (chromeIdentity, currentVideo, timestamp) => {
   try {
-    await fetch(`http://127.0.0.1:5000/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}&timestamp=${timestamp}`, {
+    await fetch(`https://tubenotes-server.herokuapp.com/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}&timestamp=${timestamp}`, {
       method: 'DELETE', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
@@ -130,93 +190,118 @@ const deleteNote = async (chromeIdentity, currentVideo, timestamp) => {
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  let information = await chrome.identity.getProfileUserInfo({'accountStatus': 'ANY'});
-  const chromeIdentity = information.id;
-  const activeTab = await getActiveTabURL();
-  const queryParameters = activeTab.url.split("?")[1];
-  const urlParameters = new URLSearchParams(queryParameters);
-  const currentVideo = urlParameters.get("v");
+const editNote = async (chromeIdentity, currentVideo, timestamp, newNote) => {
+  try {
+    await fetch(`https://tubenotes-server.herokuapp.com/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}&note=${newNote}&timestamp=${timestamp}`, {
+      method: 'PATCH', // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    })
+  } catch(err) {
+    console.log(err);
+  }
+}
+
+const save = async (chromeIdentity, currentVideo, allNotes, activeTab) => {
+  const savedNote = document.getElementById("my-note");
+  let noteContents = savedNote.value;
+
+  if(noteContents.length === 0) return;
+
+  let time = await chrome.tabs.sendMessage(activeTab.id, {
+    type: "TIME"
+  });
+
+  // remove textarea
+  const canceledNote = document.getElementById("newnote");
+  canceledNote.parentNode.removeChild(canceledNote);
+  document.getElementById("note-button").disabled = false;
+
+  let newNote = await saveNote(chromeIdentity, currentVideo, noteContents, time);
+
+  allNotes = [...allNotes, newNote];
+
+  addBookmark(newNote);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
 
   let allNotes = [];
 
-  document.getElementById("note-button").addEventListener("click", () => {
-    document.getElementById("note-button").disabled = true;
+  chrome.identity.getProfileUserInfo({'accountStatus': 'ANY'}, async (data) => {
+    const chromeIdentity = data.id;
+    const activeTab = await getActiveTabURL();
+    const queryParameters = activeTab.url.split("?")[1];
+    const urlParameters = new URLSearchParams(queryParameters);
+    const currentVideo = urlParameters.get("v");
 
-    chrome.tabs.sendMessage(activeTab.id, {
-      type: "PAUSE"
-    });
+    document.getElementById("note-button").addEventListener("click", async () => {
+      document.getElementById("note-button").disabled = true;
 
-    let bookmarkArea = document.getElementById("bookmarks");
-
-    const newNote = document.createElement("div");
-    newNote.className = "newnote";
-    newNote.id = "newnote";
-
-    const noteArea = document.createElement("textarea");
-    noteArea.id = "my-note"
-    noteArea.contentEditable = true;
-    noteArea.placeholder = "add a note here!";
-    noteArea.style.marginTop = "15px";
-    noteArea.style.width = "300px";
-    noteArea.style.height = "200px";
-
-    const buttonDiv = document.createElement("div");
-    buttonDiv.className = "newnote-buttons";
-
-    const saveButton = document.createElement("button");
-    saveButton.className = "btn btn-primary";
-    saveButton.innerHTML = "Save";
-    saveButton.addEventListener("click", () => {
-      const saveNote = document.getElementById("my-note");
-      let noteContents = saveNote.value;
-
-      // remove textarea
-      const canceledNote = document.getElementById("newnote");
-      canceledNote.parentNode.removeChild(canceledNote);
-      document.getElementById("note-button").disabled = false;
-
-      let response = await chrome.tabs.sendMessage(activeTab.id, {
+      let time = await chrome.tabs.sendMessage(activeTab.id, {
         type: "TIME"
       });
 
       for(let i = 0; i < allNotes.length; i++) {
-        if(allNotes[i].timestamp === parseFloat(response)) {
+        if(allNotes[i].timestamp === time) {
+          document.getElementById("note-button").disabled = false;
           return;
         }
-      }
+      }    
 
-      let newNote = await saveNote(chromeIdentity, currentVideo, noteContents, response);
+      await chrome.tabs.sendMessage(activeTab.id, {
+        type: "PAUSE"
+      });
 
-      allNotes = [...allNotes, newNote];
+      let bookmarkArea = document.getElementById("bookmarks");
 
-      addBookmark(newNote);
-    });
+      const newNote = document.createElement("div");
+      newNote.className = "newnote";
+      newNote.id = "newnote";
 
-    const cancelButton = document.createElement("button");
-    cancelButton.className = "btn btn-primary";
-    cancelButton.innerHTML = "Cancel";
+      const noteArea = document.createElement("textarea");
+      noteArea.id = "my-note"
+      noteArea.contentEditable = true;
+      noteArea.placeholder = "add a note here!";
+      noteArea.style.marginTop = "15px";
+      noteArea.style.width = "300px";
+      noteArea.style.height = "200px";
 
-    cancelButton.addEventListener("click", () => {
-      const canceledNote = document.getElementById("newnote");
-      canceledNote.parentNode.removeChild(canceledNote);
-      document.getElementById("note-button").disabled = false;
-    });
+      const buttonDiv = document.createElement("div");
+      buttonDiv.className = "newnote-buttons";
 
-    buttonDiv.appendChild(saveButton);
-    buttonDiv.appendChild(cancelButton);
-    newNote.appendChild(noteArea);
-    newNote.appendChild(buttonDiv);
-    bookmarkArea.appendChild(newNote);
-  })
+      const saveButton = document.createElement("button");
+      saveButton.className = "btn btn-primary";
+      saveButton.innerHTML = "Save";
+      saveButton.addEventListener("click", () => save(chromeIdentity, currentVideo, allNotes, activeTab));
 
-  if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
-    allNotes = await getNotes(chromeIdentity, currentVideo);
-    viewBookmarks(allNotes);
-  } else {
-    const container = document.getElementsByClassName("container")[0];
+      const cancelButton = document.createElement("button");
+      cancelButton.className = "btn btn-primary";
+      cancelButton.innerHTML = "Cancel";
 
-    container.innerHTML = '<div class="title">This is not a youtube video page.</div>';
-  }
+      cancelButton.addEventListener("click", () => {
+        const canceledNote = document.getElementById("newnote");
+        canceledNote.parentNode.removeChild(canceledNote);
+        document.getElementById("note-button").disabled = false;
+      });
+
+      buttonDiv.appendChild(saveButton);
+      buttonDiv.appendChild(cancelButton);
+      newNote.appendChild(noteArea);
+      newNote.appendChild(buttonDiv);
+      bookmarkArea.appendChild(newNote);
+    })
+
+    if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
+      allNotes = await getNotes(chromeIdentity, currentVideo);
+      viewBookmarks(allNotes);
+    } else {
+      const container = document.getElementsByClassName("container")[0];
+      const noteButton = document.getElementById("note-button");
+      noteButton.style.display = "none";
+      container.innerHTML = '<div class="title">This is not a youtube video page.</div>';
+    }
+  });
 });
 
