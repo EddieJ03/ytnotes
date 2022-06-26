@@ -1,4 +1,4 @@
-# tube-notes
+# YouNotes
 
 A Chrome Extension to allow you to take notes during videos. 
 

@@ -294,7 +294,14 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
+      const popup = document.getElementById("entire-popup");
+      popup.style.display = "none";
+      const spinner = document.createElement("div");
+      spinner.className = "spinner-border";
+      document.body.appendChild(spinner);
       allNotes = await getNotes(chromeIdentity, currentVideo);
+      document.body.removeChild(spinner);
+      popup.style.display = "block";
       viewBookmarks(allNotes);
     } else {
       const container = document.getElementsByClassName("container")[0];
