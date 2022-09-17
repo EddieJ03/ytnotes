@@ -11,6 +11,8 @@ const addNewBookmark = (bookmarks, bookmark) => {
   bookmarkTitleElement.className = "bookmark-title";
   controlsElement.className = "bookmark-controls";
   noteContents.innerHTML = bookmark.note;
+  noteContents.style.textAlign = "left";
+  noteContents.style.margin = "5px";
 
   setBookmarkAttributes("play", onPlay, controlsElement);
   setBookmarkAttributes("delete", onDelete, controlsElement);
@@ -70,6 +72,8 @@ const onSave = (e) => {
   const newContents = editArea.value;
   const paragraph = document.createElement("p");
   paragraph.innerHTML = newContents;
+  paragraph.style.textAlign = "left";
+  paragraph.style.margin = "5px";
   greatGrandParent.removeChild(editArea);
   greatGrandParent.appendChild(paragraph);
   const bookmarks = e.target.parentNode;
@@ -85,6 +89,8 @@ const onCancel = (e, oldContents) => {
   const greatGrandParent = e.target.parentNode.parentNode.parentNode;
   const editArea = greatGrandParent.children[1];
   const paragraph = document.createElement("p");
+  paragraph.style.textAlign = "left";
+  paragraph.style.margin = "5px";
   paragraph.innerHTML = oldContents.innerHTML;
   greatGrandParent.removeChild(editArea);
   greatGrandParent.appendChild(paragraph);
@@ -238,6 +244,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("note-button").addEventListener("click", async () => {
       document.getElementById("note-button").disabled = true;
+      
+      await chrome.tabs.sendMessage(activeTab.id, {
+        type: "PAUSE"
+      });
 
       let time = await chrome.tabs.sendMessage(activeTab.id, {
         type: "TIME"
@@ -249,10 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
       }    
-
-      await chrome.tabs.sendMessage(activeTab.id, {
-        type: "PAUSE"
-      });
 
       let bookmarkArea = document.getElementById("bookmarks");
 
@@ -266,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
       noteArea.placeholder = "add a note here!";
       noteArea.style.marginTop = "15px";
       noteArea.style.width = "300px";
-      noteArea.style.height = "200px";
+      noteArea.style.height = "150px";
 
       const buttonDiv = document.createElement("div");
       buttonDiv.className = "newnote-buttons";
