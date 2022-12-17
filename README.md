@@ -1,4 +1,4 @@
-# YouNotes
+# YTNotes
 
 A Chrome Extension to allow you to take notes during videos. 
 
