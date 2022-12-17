@@ -2,6 +2,8 @@
 
 A Chrome Extension to allow you to take notes during videos. 
 
+Backend repo can be found here: https://github.com/EddieJ03/ytnotes-backend
+
 Add a Note While Watching:
 ![image](https://user-images.githubusercontent.com/57547638/175798629-a1c81e9a-7c4e-452b-91fe-b31f4e4a250f.png)
 
