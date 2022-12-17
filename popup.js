@@ -153,14 +153,14 @@ const addBookmark = async (obj) => {
 
 const getNotes = async (chromeIdentity, currentVideo) => {
   try {
-    const response = await fetch(`https://tubenotes-server.herokuapp.com/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}`, {
+    const response = await fetch(`http://20.150.215.127/api/notes/${chromeIdentity}/${currentVideo}`, {
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
       },
     })
   
-    const data = await response.json()
+    const data = await response.json();
     return data;
   } catch(err) {
     console.log(err);
@@ -169,8 +169,8 @@ const getNotes = async (chromeIdentity, currentVideo) => {
 
 const saveNote = async (chromeIdentity, currentVideo, note, timestamp) => {
   try {
-    let response = await fetch(`https://tubenotes-server.herokuapp.com/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}&note=${note}&timestamp=${timestamp}`, {
-      method: 'PUT', // *GET, POST, PUT, DELETE, etc.
+    let response = await fetch(`http://20.150.215.127/api/notes/${chromeIdentity}/${currentVideo}/${note}/${timestamp}`, {
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
       },
@@ -185,7 +185,7 @@ const saveNote = async (chromeIdentity, currentVideo, note, timestamp) => {
 
 const deleteNote = async (chromeIdentity, currentVideo, timestamp) => {
   try {
-    await fetch(`https://tubenotes-server.herokuapp.com/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}&timestamp=${timestamp}`, {
+    await fetch(`http://20.150.215.127/api/notes/${chromeIdentity}/${currentVideo}/${timestamp}`, {
       method: 'DELETE', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
@@ -198,7 +198,7 @@ const deleteNote = async (chromeIdentity, currentVideo, timestamp) => {
 
 const editNote = async (chromeIdentity, currentVideo, timestamp, newNote) => {
   try {
-    await fetch(`https://tubenotes-server.herokuapp.com/?chrome_identity_id=${chromeIdentity}&video_id=${currentVideo}&note=${newNote}&timestamp=${timestamp}`, {
+    await fetch(`http://20.150.215.127/api/notes/${chromeIdentity}/${currentVideo}/${newNote}/${timestamp}`, {
       method: 'PATCH', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
