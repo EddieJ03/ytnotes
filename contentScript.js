@@ -9,7 +9,7 @@
 
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type, value, videoId } = obj;
-    
+
     if (type === "PLAY") {
       youtubePlayer.currentTime = value;
     } else if(type === "PAUSE") {

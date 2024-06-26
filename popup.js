@@ -1,5 +1,7 @@
 import { getActiveTabURL, getTime } from "./utils.js";
 
+const endpoint = 'http://localhost:3000/';
+
 const addNewBookmark = (bookmarks, bookmark) => {
   const bigDiv = document.createElement("div");
   const bookmarkTitleElement = document.createElement("div");
@@ -153,7 +155,7 @@ const addBookmark = async (obj) => {
 
 const getNotes = async (chromeIdentity, currentVideo) => {
   try {
-    const response = await fetch(`http://20.150.215.127/api/notes/${chromeIdentity}/${currentVideo}`, {
+    const response = await fetch(`${endpoint}api/notes/${chromeIdentity}/${currentVideo}`, {
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
@@ -169,7 +171,7 @@ const getNotes = async (chromeIdentity, currentVideo) => {
 
 const saveNote = async (chromeIdentity, currentVideo, note, timestamp) => {
   try {
-    let response = await fetch(`http://20.150.215.127/api/notes/${chromeIdentity}/${currentVideo}/${note}/${timestamp}`, {
+    let response = await fetch(`${endpoint}api/notes/${chromeIdentity}/${currentVideo}/${note}/${timestamp}`, {
       method: 'POST', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
@@ -185,7 +187,7 @@ const saveNote = async (chromeIdentity, currentVideo, note, timestamp) => {
 
 const deleteNote = async (chromeIdentity, currentVideo, timestamp) => {
   try {
-    await fetch(`http://20.150.215.127/api/notes/${chromeIdentity}/${currentVideo}/${timestamp}`, {
+    await fetch(`${endpoint}api/notes/${chromeIdentity}/${currentVideo}/${timestamp}`, {
       method: 'DELETE', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
@@ -198,7 +200,7 @@ const deleteNote = async (chromeIdentity, currentVideo, timestamp) => {
 
 const editNote = async (chromeIdentity, currentVideo, timestamp, newNote) => {
   try {
-    await fetch(`http://20.150.215.127/api/notes/${chromeIdentity}/${currentVideo}/${newNote}/${timestamp}`, {
+    await fetch(`${endpoint}api/notes/${chromeIdentity}/${currentVideo}/${newNote}/${timestamp}`, {
       method: 'PATCH', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/json'
