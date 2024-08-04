@@ -1,6 +1,6 @@
 # YTNotes
 
-A Chrome Extension to allow you to take notes during videos. If you'd like to try it out, follow these instructions:
+A Chrome Extension to allow you to take notes during videos. If you'd like to try it out locally, follow these instructions:
 
 1. Git clone this repo
 2. Make sure to clone the backend repo and follow its instructions. Backend repo instructions can be found here: https://github.com/EddieJ03/ytnotes-backend
