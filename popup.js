@@ -1,6 +1,8 @@
 import { getActiveTabURL, getTime } from "./utils.js";
 
-const endpoint = 'http://localhost:3000/';
+const PORT = 3000
+
+const endpoint = `http://localhost:${PORT}/`;
 
 const addNewBookmark = (bookmarks, bookmark) => {
   const bigDiv = document.createElement("div");
